@@ -63,7 +63,7 @@ void BaseProtocol::feed(std::vector<uint8_t>&& data)
     if (data.size() == 4) {
         handle_ack(id);
     } else {
-        handle_message_ack(id, {data.data() + sizeof(id), data.size() - sizeof(id)});
+        handle_message(id, {data.data() + sizeof(id), data.size() - sizeof(id)});
     }
 }
 
@@ -76,7 +76,7 @@ void BaseProtocol::handle_ack(uint32_t id)
     queue_current_message_for_send();
 }
 
-void BaseProtocol::handle_message_ack(uint32_t id, std::span<uint8_t> data)
+void BaseProtocol::handle_message(uint32_t id, std::span<uint8_t> data)
 {
     std::vector<uint8_t> _data{data.begin(), data.end()};
     _rx.messages.emplace(id, _data);
@@ -104,7 +104,7 @@ void BaseProtocol::update_read_ready()
     }
 }
 
-void BaseProtocol::send(const std::span<uint8_t> data)
+void BaseProtocol::send(std::span<const uint8_t> data)
 {
     _tx.messages.emplace(_tx.next_id, std::vector<uint8_t>(data.begin(), data.end()));
     _tx.next_id++;

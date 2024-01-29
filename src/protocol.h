@@ -34,14 +34,14 @@ public:
     /**
      * Queue data to be sent
      */
-    void send(const std::span<uint8_t> data);
+    void send(std::span<const uint8_t> data);
 
 protected:
     void do_update();
 
 private:
     void handle_ack(uint32_t id);
-    void handle_message_ack(uint32_t id, std::span<uint8_t> data);
+    void handle_message(uint32_t id, std::span<uint8_t> data);
     void update_read_ready();
 
     void queue_current_message_for_send();
