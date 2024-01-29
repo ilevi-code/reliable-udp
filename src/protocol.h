@@ -64,7 +64,8 @@ public:
     using Duration = typename Clock::duration;
     using TimePoint = typename Clock::time_point;
 
-    ReliableProtocol() : BaseProtocol() {}
+    ReliableProtocol() : BaseProtocol(), _interval(std::chrono::milliseconds(20)) {}
+    ReliableProtocol(Duration interval) : BaseProtocol(), _interval(interval) {}
 
     /**
      * Notify that some time has passed.
@@ -72,22 +73,33 @@ public:
      * @note If last requested duration hasn't passed, nothing is done.
      *       An updated duration will returned.
      */
-    Duration update()
+    std::optional<Duration> update()
     {
         using namespace std::chrono_literals;
-        static constexpr auto INTERVAL = 1s;
         auto now = Clock::now();
 
-        if (_next_update < now)
+        if (!_next_update)
+        {
+            _next_update = now + _interval;
+        }
+        else if (_next_update.value() < now)
         {
             do_update();
-            _next_update = now + INTERVAL;
-            return INTERVAL;
+            _next_update = now + _interval;
         }
-        return _next_update - now;
+        return _next_update.value() - now;
+    }
 
+    std::optional<std::vector<uint8_t>> pop_send_ready()
+    {
+        auto message = BaseProtocol::pop_send_ready();
+        if (message.has_value() && message->size() > 4) {
+            update();
+        }
+        return message;
     }
 
 private:
-    TimePoint _next_update;
+    std::optional<TimePoint> _next_update;
+    Duration _interval;
 };
