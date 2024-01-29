@@ -9,6 +9,7 @@ using namespace std::chrono_literals;
 class ReliableProtocolTest : public testing::Test
 {
 protected:
+    ReliableProtocolTest() : proto(1s) {}
     void SetUp() override
     {
         FakeClock::reset();
@@ -65,7 +66,7 @@ TEST_F(ReliableProtocolTest, SecondSend)
     ASSERT_EQ(proto.pop_send_ready(), expected);
 }
 
-TEST_F(ReliableProtocolTest, UpdateQueueRetransmission)
+TEST_F(ReliableProtocolTest, UpdateCausesRetransmission)
 {
     proto.send(to_span("abcd"));
     auto message = proto.pop_send_ready();

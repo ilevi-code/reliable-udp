@@ -9,6 +9,7 @@ using namespace std::chrono_literals;
 class ReliableConversationTest : public testing::Test
 {
 protected:
+    ReliableConversationTest() : sender(1s), receiver(1s) {}
     void SetUp() override
     {
         FakeClock::reset();
